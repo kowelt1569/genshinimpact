@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1117">
+<title>Genshin Collection</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C8A84B;
+    --gold-dim: #C8A84B33;
+    --purple: #6B4FA0;
+    --purple-dim: #6B4FA033;
+    --bg: #0D1117;
+    --surface: #161B27;
+    --surface2: #1E2540;
+    --surface3: #252D47;
+    --text: #E8EAF0;
+    --text-muted: #8891AA;
+    --border: #FFFFFF18;
+    --border-hover: #FFFFFF30;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 80px;
+  }
+
+  /* Header */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px 0;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .app-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .app-title span { color: var(--gold); }
+  .stats-pills {
+    display: flex;
+    gap: 6px;
+  }
+  .stat-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .stat-pill strong { color: var(--text); font-weight: 600; }
+  .stat-pill .ti { font-size: 12px; }
+
+  /* Tab bar */
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .tab-btn.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1a1000;
+    font-weight: 600;
+  }
+  .tab-btn:active { transform: scale(0.96); }
+
+  /* Content */
+  .content { flex: 1; padding: 8px 0 0; }
+
+  /* Series section */
+  .series-section { padding: 12px 16px 0; }
+  .series-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .series-title-wrap { flex: 1; min-width: 0; }
+  .series-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .series-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .series-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .series-link .ti { font-size: 11px; }
+  .rarity-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    max-width: 140px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .rarity-badge.secret {
+    color: var(--gold);
+    border-color: var(--gold-dim);
+    background: var(--gold-dim);
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #F0C96B);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Figure grid */
+  .figures-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  /* Figure card */
+  .figure-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .figure-card:active { transform: scale(0.97); }
+  .figure-card.owned { border-color: var(--gold); }
+  .figure-card.wished { border-color: var(--purple); }
+  .figure-card.secret-card { background: linear-gradient(135deg, var(--surface) 80%, #2A1F0A); }
+
+  /* Card image */
+  .card-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+  }
+  .card-fallback {
+    font-size: 40px;
+    color: var(--text-muted);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  .card-fallback .ti { font-size: 40px; }
+
+  /* Card badges */
+  .badge-owned, .badge-wished {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .badge-owned { background: var(--gold); color: #1a1000; }
+  .badge-wished { background: var(--purple); color: #fff; }
+  .badge-wished .ti { font-size: 12px; }
+  .badge-secret {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    font-size: 13px;
+    text-shadow: 0 0 8px rgba(200,168,75,0.8);
+    color: var(--gold);
+  }
+
+  /* Card info */
+  .card-info {
+    padding: 8px 10px 6px;
+  }
+  .card-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-series-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Card action buttons */
+  .card-actions {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+  .card-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: background 0.12s;
+    min-height: 36px;
+  }
+  .card-btn:active { background: var(--surface2); }
+  .card-btn + .card-btn { border-left: 1px solid var(--border); }
+  .card-btn.active-own { color: var(--gold); }
+  .card-btn.active-wish { color: var(--purple); }
+  .card-btn .ti { font-size: 13px; }
+
+  /* Section divider */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 16px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px 40px;
+    color: var(--text-muted);
+  }
+  .empty-state .ti {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+  .empty-state h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .empty-state p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 4px;
+    gap: 3px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-family: inherit;
+    transition: color 0.15s;
+    min-height: 56px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .nav-btn .ti { font-size: 22px; }
+  .nav-btn.active { color: var(--gold); }
+  .nav-btn:active { opacity: 0.7; }
+
+  @media (max-width: 360px) {
+    .figures-grid { gap: 8px; }
+    .card-name { font-size: 11px; }
+    .series-name { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <div class="header-top">
+      <div class="app-title">Genshin <span>Tracker</span></div>
+      <div class="stats-pills" id="statsRow"></div>
+    </div>
+    <nav class="tab-bar" id="tabBar" role="tablist"></nav>
+  </header>
+
+  <main class="content" id="content" role="main"></main>
+</div>
+
+<nav class="bottom-nav" role="navigation" aria-label="Навігація">
+  <button class="nav-btn active" id="nav-all" onclick="setNav('all')">
+    <i class="ti ti-layout-grid" aria-hidden="true"></i>
+    Всі серії
+  </button>
+  <button class="nav-btn" id="nav-owned" onclick="setNav('owned')">
+    <i class="ti ti-star" aria-hidden="true"></i>
+    Зібрані
+  </button>
+  <button class="nav-btn" id="nav-wished" onclick="setNav('wished')">
+    <i class="ti ti-heart" aria-hidden="true"></i>
+    Вішліст
+  </button>
+</nav>
+
+<script>
+const SERIES = [
+  {
+    id: "aranara",
+    name: "Aranara Series",
+    rarity: "Звичайна серія",
+    secret: false,
+    link: "https://genshinfans.com/products/official-aranara-series-blind-box",
+    figures: [
+      { id: "a1", name: "Arama",         img: "" },
+      { id: "a2", name: "Arakanta",      img: "" },
+      { id: "a3", name: "Ararycan",      img: "" },
+      { id: "a4", name: "Arakunti",      img: "" },
+      { id: "a5", name: "Arakavi",       img: "" },
+      { id: "a6", name: "Aramuhukunda", img: "" },
+      { id: "a7", name: "Arabalika",     img: "" },
+      { id: "a8", name: "Aranaga",       img: "" },
+      { id: "a9", name: "Arapandu",      img: "" }
+    ]
+  },
+  {
+    id: "slime",
+    name: "Slime Series",
+    rarity: "Звичайна серія",
+    secret: false,
+    link: "https://kumagameshop.com/products/genshin-impact-slime-series-mini-slime-blind-bags",
+    figures: [
+      { id: "s1", name: "Anemo Slime",   img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Anemo.png" },
+      { id: "s2", name: "Geo Slime",     img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Geo.png" },
+      { id: "s3", name: "Electro Slime", img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Electro.png" },
+      { id: "s4", name: "Hydro Slime",   img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Hydro.png" },
+      { id: "s5", name: "Pyro Slime",    img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Pyro.png" },
+      { id: "s6", name: "Cryo Slime",    img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Cryo.png" },
+      { id: "s7", name: "Dendro Slime",  img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Dendro.png" },
+      { id: "s8", name: "Hydro Large",   img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Hydro.png" },
+      { id: "s9", name: "Pyro Large",    img: "https://rerollcdn.com/GENSHIN/Enemies/Slime-Pyro.png" }
+    ]
+  },
+  {
+    id: "dressup",
+    name: "Dress-Up Dreams",
+    rarity: "Секретка: Venti (1/144)",
+    secret: true,
+    link: "https://hoyo.global/product/popmart-dress-up-dreams-figure/",
+    figures: [
+      { id: "d1",  name: "Albedo — Художник",    img: "https://rerollcdn.com/GENSHIN/Characters/new/Albedo.png" },
+      { id: "d2",  name: "Barbara — Співачка",    img: "https://rerollcdn.com/GENSHIN/Characters/new/Barbara.png" },
+      { id: "d3",  name: "Tartaglia — Продавець", img: "https://rerollcdn.com/GENSHIN/Characters/new/Tartaglia.png" },
+      { id: "d4",  name: "Ganyu — Секретарка",    img: "https://rerollcdn.com/GENSHIN/Characters/new/Ganyu.png" },
+      { id: "d5",  name: "Hu Tao — Продавчиня",   img: "https://rerollcdn.com/GENSHIN/Characters/new/Hu_Tao.png" },
+      { id: "d6",  name: "Jean — Керівниця",       img: "https://rerollcdn.com/GENSHIN/Characters/new/Jean.png" },
+      { id: "d7",  name: "Thoma — Дворецький",     img: "https://rerollcdn.com/GENSHIN/Characters/new/Thoma.png" },
+      { id: "d8",  name: "Venti — Пілот",          img: "https://rerollcdn.com/GENSHIN/Characters/new/Venti.png" },
+      { id: "d9",  name: "Gorou — Доглядач",       img: "https://rerollcdn.com/GENSHIN/Characters/new/Gorou.png" },
+      { id: "d10", name: "Yoimiya — Феєрверки",    img: "https://rerollcdn.com/GENSHIN/Characters/new/Yoimiya.png" },
+      { id: "d11", name: "Xiangling — Шеф",        img: "https://rerollcdn.com/GENSHIN/Characters/new/Xiangling.png" },
+      { id: "d12", name: "Xingqiu — Письменник",   img: "https://rerollcdn.com/GENSHIN/Characters/new/Xingqiu.png" },
+      { id: "d13", name: "★ Venti — Музикант",     img: "https://rerollcdn.com/GENSHIN/Characters/new/Venti.png", secret: true }
+    ]
+  },
+  {
+    id: "popcarnival",
+    name: "Pop Carnival",
+    rarity: "Є секретні фігурки",
+    secret: true,
+    link: "https://genshinfans.com/search?q=pop+mart+genshin",
+    figures: [
+      { id: "p1", name: "Venti",         img: "https://rerollcdn.com/GENSHIN/Characters/new/Venti.png" },
+      { id: "p2", name: "Hu Tao",        img: "https://rerollcdn.com/GENSHIN/Characters/new/Hu_Tao.png" },
+      { id: "p3", name: "Zhongli",       img: "https://rerollcdn.com/GENSHIN/Characters/new/Zhongli.png" },
+      { id: "p4", name: "Raiden Shogun", img: "https://rerollcdn.com/GENSHIN/Characters/new/Raiden_Shogun.png" },
+      { id: "p5", name: "Nahida",        img: "https://rerollcdn.com/GENSHIN/Characters/new/Nahida.png" },
+      { id: "p6", name: "Yae Miko",      img: "https://rerollcdn.com/GENSHIN/Characters/new/Yae_Miko.png" }
+    ]
+  },
+  {
+    id: "childlike",
+    name: "Childlike Innocence",
+    rarity: "Нова серія",
+    secret: false,
+    link: "https://genshinfans.com/products/official-genshin-childlike-innocence-blind-box-figure",
+    figures: [
+      { id: "c1", name: "Klee",  img: "https://rerollcdn.com/GENSHIN/Characters/new/Klee.png" },
+      { id: "c2", name: "Qiqi",  img: "https://rerollcdn.com/GENSHIN/Characters/new/Qiqi.png" },
+      { id: "c3", name: "Xiao",  img: "https://rerollcdn.com/GENSHIN/Characters/new/Xiao.png" },
+      { id: "c4", name: "Hu Tao",img: "https://rerollcdn.com/GENSHIN/Characters/new/Hu_Tao.png" },
+      { id: "c5", name: "Ganyu", img: "https://rerollcdn.com/GENSHIN/Characters/new/Ganyu.png" }
+    ]
+  },
+  {
+    id: "saurian",
+    name: "Natlan Baby Saurian",
+    rarity: "Секретка: Companion Saurian",
+    secret: true,
+    link: "https://genshinfans.com/search?q=saurian+blind+box",
+    figures: [
+      { id: "n1", name: "Tepetlisaur",         img: "" },
+      { id: "n2", name: "Yumkasaur",           img: "" },
+      { id: "n3", name: "Koholasaur",          img: "" },
+      { id: "n4", name: "Qucusaur",            img: "" },
+      { id: "n5", name: "★ Companion Saurian", img: "", secret: true }
+    ]
+  },
+  {
+    id: "melusine",
+    name: "Melusine Series",
+    rarity: "Рідкісна серія",
+    secret: false,
+    link: "",
+    figures: [
+      { id: "m1", name: "Melusine #1", img: "" },
+      { id: "m2", name: "Melusine #2", img: "" },
+      { id: "m3", name: "Melusine #3", img: "" },
+      { id: "m4", name: "Melusine #4", img: "" },
+      { id: "m5", name: "Melusine #5", img: "" }
+    ]
+  },
+  {
+    id: "fontaine",
+    name: "Fontaine Sea Creatures",
+    rarity: "Колекційна серія",
+    secret: false,
+    link: "",
+    figures: [
+      { id: "f1", name: "Octopus #1",      img: "" },
+      { id: "f2", name: "Octopus #2",      img: "" },
+      { id: "f3", name: "Sea Creature #1", img: "" },
+      { id: "f4", name: "Sea Creature #2", img: "" },
+      { id: "f5", name: "Sea Creature #3", img: "" }
+    ]
+  },
+  {
+    id: "nodkrai",
+    name: "Nod-Krai Chibi",
+    rarity: "Є прихований персонаж",
+    secret: true,
+    link: "https://www.reddit.com/r/Genshin_Impact/comments/1pw1xbj/nodkrai_chibi_figure_series/",
+    figures: [
+      { id: "nk1", name: "Varka",     img: "" },
+      { id: "nk2", name: "Columbina", img: "" },
+      { id: "nk3", name: "Durin",     img: "" },
+      { id: "nk4", name: "Ineffa",    img: "" },
+      { id: "nk5", name: "Aino",      img: "" },
+      { id: "nk6", name: "Flins",     img: "" },
+      { id: "nk7", name: "Rerir",     img: "" }
+    ]
+  }
+];
+
+/* ── State ── */
+let state = {};
+let activeNav = "all";
+let activeTab = "all";
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem("genshin_v2");
+    if (saved) state = JSON.parse(saved);
+  } catch(e) {}
+  SERIES.forEach(s => s.figures.forEach(f => {
+    if (!state[f.id]) state[f.id] = { owned: false, wished: false };
+  }));
+}
+function saveState() {
+  try { localStorage.setItem("genshin_v2", JSON.stringify(state)); } catch(e) {}
+}
+
+/* ── Actions ── */
+window.toggleOwned = function(id) {
+  state[id].owned = !state[id].owned;
+  if (state[id].owned) state[id].wished = false;
+  saveState(); render();
+};
+window.toggleWished = function(id) {
+  state[id].wished = !state[id].wished;
+  if (state[id].wished) state[id].owned = false;
+  saveState(); render();
+};
+window.setTab = function(id) {
+  activeTab = id;
+  render();
+  const btn = document.querySelector(`[data-tab="${id}"]`);
+  if (btn) btn.scrollIntoView({ inline: "center", block: "nearest" });
+};
+window.setNav = function(id) {
+  activeNav = id;
+  activeTab = "all";
+  render();
+};
+
+/* ── Stats ── */
+function getStats() {
+  let total = 0, owned = 0, wished = 0;
+  SERIES.forEach(s => s.figures.forEach(f => {
+    total++;
+    if (state[f.id]?.owned) owned++;
+    if (state[f.id]?.wished) wished++;
+  }));
+  return { total, owned, wished };
+}
+
+/* ── Render helpers ── */
+function imgTag(fig, seriesId) {
+  if (!fig.img) return `<div class="card-fallback"><i class="ti ti-package" aria-hidden="true"></i></div>`;
+  return `<img src="${fig.img}" alt="${fig.name}" loading="lazy"
+    onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=\\'card-fallback\\'><i class=\\'ti ti-package\\'></i></div>')"
+  >`;
+}
+
+function renderCard(fig, series) {
+  const st = state[fig.id] || {};
+  const owned = st.owned, wished = st.wished;
+  let cls = "figure-card";
+  if (owned) cls += " owned";
+  else if (wished) cls += " wished";
+  if (fig.secret) cls += " secret-card";
+
+  return `
+<article class="${cls}" aria-label="${fig.name}">
+  <div class="card-image">
+    ${imgTag(fig, series.id)}
+    ${owned ? '<div class="badge-owned" aria-label="Зібрано">✓</div>' : ''}
+    ${wished && !owned ? '<div class="badge-wished" aria-label="У вішлісті"><i class="ti ti-heart" aria-hidden="true"></i></div>' : ''}
+    ${fig.secret ? '<div class="badge-secret" aria-label="Секретна фігурка">★</div>' : ''}
+  </div>
+  <div class="card-info">
+    <div class="card-name" title="${fig.name}">${fig.name}</div>
+    <div class="card-series-label">${series.name}</div>
+  </div>
+  <div class="card-actions">
+    <button class="card-btn ${owned ? 'active-own' : ''}" onclick="toggleOwned('${fig.id}')" aria-pressed="${owned}">
+      <i class="ti ti-${owned ? 'check' : 'plus'}" aria-hidden="true"></i>${owned ? 'Є' : 'Маю'}
+    </button>
+    <button class="card-btn ${wished ? 'active-wish' : ''}" onclick="toggleWished('${fig.id}')" aria-pressed="${wished}">
+      <i class="ti ti-heart" aria-hidden="true"></i>${wished ? 'В списку' : 'Хочу'}
+    </button>
+  </div>
+</article>`;
+}
+
+function renderSeriesBlock(series) {
+  const ownedCount = series.figures.filter(f => state[f.id]?.owned).length;
+  const pct = Math.round((ownedCount / series.figures.length) * 100);
+  const linkHtml = series.link
+    ? `<a class="series-link" href="${series.link}" target="_blank" rel="noopener">
+        Магазин <i class="ti ti-external-link" aria-hidden="true"></i>
+      </a>`
+    : '';
+
+  return `
+<section class="series-section">
+  <div class="series-header">
+    <div class="series-title-wrap">
+      <div class="series-name">${series.name}</div>
+      <div class="series-meta">
+        ${ownedCount}/${series.figures.length} зібрано
+        ${linkHtml}
+      </div>
+    </div>
+    <div class="rarity-badge ${series.secret ? 'secret' : ''}" title="${series.rarity}">${series.rarity}</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-fill" style="width:${pct}%"></div>
+  </div>
+  <div class="figures-grid">
+    ${series.figures.map(f => renderCard(f, series)).join("")}
+  </div>
+</section>
+<div class="section-divider"></div>`;
+}
+
+/* ── Main render ── */
+function render() {
+  const stats = getStats();
+
+  /* Stats row */
+  document.getElementById("statsRow").innerHTML = `
+    <div class="stat-pill">
+      <i class="ti ti-package" aria-hidden="true"></i>
+      <strong>${stats.owned}</strong>/${stats.total}
+    </div>
+    <div class="stat-pill" style="color:#9B7DD4">
+      <i class="ti ti-heart" aria-hidden="true" style="color:#9B7DD4"></i>
+      <strong style="color:#9B7DD4">${stats.wished}</strong>
+    </div>`;
+
+  /* Tab bar — shown only in "all" nav with series tabs */
+  let tabsHtml = '';
+  if (activeNav === "all") {
+    const tabs = [{ id: "all", label: "Всі" }, ...SERIES.map(s => ({ id: s.id, label: s.name.split(" ").slice(0,2).join(" ") }))];
+    tabsHtml = tabs.map(t =>
+      `<button class="tab-btn ${activeTab === t.id ? 'active' : ''}" data-tab="${t.id}" onclick="setTab('${t.id}')" role="tab" aria-selected="${activeTab === t.id}">${t.label}</button>`
+    ).join("");
+  }
+  document.getElementById("tabBar").innerHTML = tabsHtml;
+
+  /* Bottom nav active state */
+  ["all","owned","wished"].forEach(id => {
+    const el = document.getElementById(`nav-${id}`);
+    if (el) el.classList.toggle("active", activeNav === id);
+  });
+
+  /* Content */
+  let html = "";
+
+  if (activeNav === "owned") {
+    const list = [];
+    SERIES.forEach(s => s.figures.forEach(f => { if (state[f.id]?.owned) list.push({f,s}); }));
+    if (!list.length) {
+      html = `<div class="empty-state">
+        <i class="ti ti-star" aria-hidden="true"></i>
+        <h3>Колекція порожня</h3>
+        <p>Познач фігурки натиснувши "Маю"<br>і вони з'являться тут.</p>
+      </div>`;
+    } else {
+      html = `<section class="series-section">
+        <div class="series-header"><div class="series-name">Зібрані фігурки</div>
+        <div class="rarity-badge">${list.length} шт.</div></div>
+        <div class="figures-grid">${list.map(({f,s}) => renderCard(f,s)).join("")}</div>
+      </section>`;
+    }
+
+  } else if (activeNav === "wished") {
+    const list = [];
+    SERIES.forEach(s => s.figures.forEach(f => { if (state[f.id]?.wished) list.push({f,s}); }));
+    if (!list.length) {
+      html = `<div class="empty-state">
+        <i class="ti ti-heart" aria-hidden="true"></i>
+        <h3>Вішліст порожній</h3>
+        <p>Натисни "Хочу" на фігурці,<br>щоб додати її до списку бажань.</p>
+      </div>`;
+    } else {
+      html = `<section class="series-section">
+        <div class="series-header"><div class="series-name">Список бажань</div>
+        <div class="rarity-badge" style="color:#9B7DD4;border-color:#6B4FA066;background:#6B4FA022">${list.length} шт.</div></div>
+        <div class="figures-grid">${list.map(({f,s}) => renderCard(f,s)).join("")}</div>
+      </section>`;
+    }
+
+  } else {
+    /* All series — with tab filter */
+    const toShow = activeTab === "all" ? SERIES : SERIES.filter(s => s.id === activeTab);
+    toShow.forEach(s => { html += renderSeriesBlock(s); });
+  }
+
+  document.getElementById("content").innerHTML = html;
+}
+
+/* ── Boot ── */
+loadState();
+render();
+</script>
+</body>
+</html>
